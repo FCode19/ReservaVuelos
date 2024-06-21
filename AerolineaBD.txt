@@ -1,0 +1,103 @@
+CREATE DATABASE IF NOT EXISTS Aerolinea;
+
+USE Aerolinea;
+
+-- Tabla Aeropuertos
+CREATE TABLE Aeropuertos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(255) NOT NULL,
+    ciudad VARCHAR(255) NOT NULL,
+    codigo VARCHAR(10) NOT NULL
+);
+
+-- Tabla Usuarios
+CREATE TABLE Usuarios (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(255) NOT NULL,
+    apellido_paterno VARCHAR(255) NOT NULL,
+    apellido_materno VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    contraseña VARCHAR(255) NOT NULL,
+    fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    rol VARCHAR(50) NOT NULL
+);
+
+-- Tabla Vuelos
+CREATE TABLE Vuelos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    numero_vuelo VARCHAR(50) NOT NULL,
+    origen_id INT NOT NULL,
+    destino_id INT NOT NULL,
+    fecha_salida TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    fecha_llegada TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    asientos_totales INT NOT NULL,
+    asientos_disponibles INT NOT NULL,
+    precio DECIMAL(10, 2) NOT NULL,
+    FOREIGN KEY (origen_id) REFERENCES Aeropuertos(id),
+    FOREIGN KEY (destino_id) REFERENCES Aeropuertos(id)
+);
+
+-- Tabla Reservas
+CREATE TABLE Reservas (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    usuario_id INT NOT NULL,
+    vuelo_id INT NOT NULL,
+    fecha_reserva TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    estado VARCHAR(50) NOT NULL,
+    cantidad_asientos INT NOT NULL,
+    precio_total DECIMAL(10, 2) NOT NULL,
+    metodo_pago VARCHAR(50) NOT NULL,
+    FOREIGN KEY (usuario_id) REFERENCES Usuarios(id),
+    FOREIGN KEY (vuelo_id) REFERENCES Vuelos(id)
+);
+
+-- Tabla Pagos
+CREATE TABLE Pagos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    reserva_id INT NOT NULL,
+    metodo VARCHAR(50) NOT NULL,
+    detalle VARCHAR(255),
+    monto DECIMAL(10, 2) NOT NULL,
+    fecha_pago TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (reserva_id) REFERENCES Reservas(id)
+);
+
+-- Poblar la tabla Aeropuertos
+INSERT INTO Aeropuertos (nombre, ciudad, codigo) VALUES
+('Aeropuerto Internacional Jorge Chávez', 'Lima', 'LIM'),
+('Aeropuerto Internacional El Dorado', 'Bogotá', 'BOG'),
+('Aeropuerto Internacional de Ezeiza', 'Buenos Aires', 'EZE'),
+('Aeropuerto Internacional de Carrasco', 'Montevideo', 'MVD'),
+('Aeropuerto Internacional Arturo Merino Benítez', 'Santiago', 'SCL');
+
+-- Poblar la tabla Usuarios
+INSERT INTO Usuarios (nombre, apellido_paterno, apellido_materno, email, contraseña, rol) VALUES
+('Juan', 'Pérez', 'González', 'juan.perez@air.com', 'password123', 'admin'),
+('María', 'López', 'Rodríguez', 'maria.lopez@gmail.com', 'securepass', 'cliente'),
+('Carlos', 'García', 'Martínez', 'carlos.garcia@outlook.com', 'mypassword', 'cliente'),
+('Ana', 'Fernández', 'Sánchez', 'ana.fernandez@yahoo.com', 'mypassword2', 'cliente'),
+('Luis', 'Torres', 'Hernández', 'luis.torres@hotmail.com', 'password321', 'cliente');
+
+-- Poblar la tabla Vuelos
+INSERT INTO Vuelos (numero_vuelo, origen_id, destino_id, fecha_salida, fecha_llegada, asientos_totales, asientos_disponibles, precio) VALUES
+('LA251', 1, 2, '2024-06-20 14:00:00', '2024-06-20 16:00:00', 150, 50, 299.99),
+('AV302', 2, 3, '2024-06-21 10:00:00', '2024-06-21 14:00:00', 180, 120, 399.99),
+('AR450', 3, 4, '2024-06-22 09:00:00', '2024-06-22 11:30:00', 200, 80, 279.99),
+('UC789', 4, 5, '2024-06-23 13:00:00', '2024-06-23 15:00:00', 220, 200, 349.99),
+('LA123', 5, 1, '2024-06-24 08:00:00', '2024-06-24 12:00:00', 170, 70, 499.99);
+
+-- Poblar la tabla Reservas
+INSERT INTO Reservas (usuario_id, vuelo_id, fecha_reserva, estado, cantidad_asientos, precio_total, metodo_pago) VALUES
+(1, 1, '2024-06-10 10:00:00', 'confirmada', 2, 599.98, 'tarjeta'),
+(2, 2, '2024-06-11 12:00:00', 'confirmada', 1, 399.99, 'efectivo'),
+(3, 3, '2024-06-12 14:00:00', 'pendiente', 3, 839.97, 'tarjeta'),
+(4, 4, '2024-06-13 16:00:00', 'cancelada', 2, 699.98, 'efectivo'),
+(5, 5, '2024-06-14 18:00:00', 'confirmada', 1, 499.99, 'tarjeta');
+
+-- Poblar la tabla Pagos
+INSERT INTO Pagos (reserva_id, metodo, detalle, monto) VALUES
+(1, 'tarjeta', 'Visa ****1234', 599.98),
+(2, 'efectivo', NULL, 399.99),
+(3, 'tarjeta', 'Mastercard ****5678', 839.97),
+(4, 'efectivo', NULL, 699.98),
+(5, 'tarjeta', 'Amex ****9101', 499.99);
